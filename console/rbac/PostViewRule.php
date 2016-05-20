@@ -19,9 +19,7 @@ class PostViewRule extends Rule
     {
         $can = false;
         if (isset($params['post'])) {
-            if ($params['post']->ownerId == $user)
-                $can = true;
-            elseif ($params['post']->status != Post::STATUS_DELETED)
+            if ($params['post']->ownerId == $user or $params['post']->status != Post::STATUS_DELETED)
                 $can = true;
         }
 
