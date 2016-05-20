@@ -114,6 +114,7 @@ class SiteController extends FrontendController
         $model = new SignupForm();
         if ($model->load(Yii::$app->request->post())) {
             if ($user = $model->signup()) {
+                Yii::$app->authManager->assign(Yii::$app->authManager->getRole($user->role), $user->id);
                 if (Yii::$app->getUser()->login($user)) {
                     return $this->goHome();
                 }
