@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use common\models\User;
 use console\rbac\AuthorRule;
+use console\rbac\PostViewRule;
 use yii;
 use yii\console\Controller;
 
@@ -30,6 +31,9 @@ class RbacController extends Controller
         $authorRule = new AuthorRule();
         $auth->add($authorRule);
 
+        $postViewRule = new PostViewRule();
+        $auth->add($postViewRule);
+
         $updateOwnPost = $auth->createPermission('updateOwnPost');
         $updateOwnPost->description = 'Update own post';
         $updateOwnPost->ruleName = $authorRule->name;
@@ -37,5 +41,12 @@ class RbacController extends Controller
 
         // allow "author" to update their own posts
         $auth->addChild($user, $updateOwnPost);
+
+        $viewPost = $auth->createPermission('postView');
+        $viewPost->description = 'View post';
+        $viewPost->ruleName = $postViewRule->name;
+        $auth->add($viewPost);
+
+        $auth->addChild($user, $viewPost);
     }
 }
