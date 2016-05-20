@@ -10,6 +10,9 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
 
+/** @var \backend\controllers\BackendController $controller */
+$controller = $this->context;
+
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -28,7 +31,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'My Company',
+        'brandLabel' => 'Umber firm',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -40,6 +43,9 @@ AppAsset::register($this);
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
+        $menuItems[] = ['label' => 'Users', 'url' => ['/users'], 'active' => ($controller->navbarActiveItem == 'users')];
+        $menuItems[] = ['label' => 'Categories', 'url' => ['/post-categories'], 'active' => ($controller->navbarActiveItem == 'post-categories')];
+        $menuItems[] = ['label' => 'Posts', 'url' => ['/posts'], 'active' => ($controller->navbarActiveItem == 'posts')];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(

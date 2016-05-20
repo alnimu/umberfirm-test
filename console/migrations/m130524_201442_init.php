@@ -20,9 +20,10 @@ class m130524_201442_init extends Migration
             'password_reset_token' => $this->string()->unique(),
             'email' => $this->string()->notNull()->unique(),
 
-            'status' => $this->smallInteger()->notNull()->defaultValue(10),
-            'created_at' => $this->integer()->notNull(),
-            'updated_at' => $this->integer()->notNull(),
+            'role' => $this->smallInteger()->notNull()->defaultValue(3),
+            'status' => $this->smallInteger()->notNull()->defaultValue(1),
+            'created_at' => 'TIMESTAMP NULL DEFAULT NULL',
+            'updated_at' => 'TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP',
         ], $tableOptions);
     }
 

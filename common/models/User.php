@@ -1,7 +1,8 @@
 <?php
 namespace common\models;
 
-use Yii;
+use common\scopes\UsersQuery;
+use yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -16,16 +17,42 @@ use yii\web\IdentityInterface;
  * @property string $password_reset_token
  * @property string $email
  * @property string $auth_key
+ * @property integer $role
  * @property integer $status
  * @property integer $created_at
  * @property integer $updated_at
- * @property string $password write-only password
+ *
+ * @property string $roleName read-only roleName
+ * @property string $statusName read-only statusName
  */
 class User extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
-    const STATUS_ACTIVE = 10;
+    const STATUS_ACTIVE = 1;
+    const STATUS_BANNED = 2;
 
+    const ROLE_ADMIN = 1;
+    const ROLE_MODERATOR = 2;
+    const ROLE_USER = 3;
+    
+    const SCENARIO_CREATE = 'create';
+
+    const EVENT_CREATE = 'create';
+    const EVENT_UPDATE = 'update';
+    const EVENT_DELETE = 'delete';
+
+    public static $statuses = [
+        self::STATUS_ACTIVE => 'Active',
+        self::STATUS_BANNED => 'Banned'
+    ];
+    
+    public static $roles = [
+        self::ROLE_ADMIN => 'Admin',
+        self::ROLE_MODERATOR => 'Moderator',
+        self::ROLE_USER => 'User'
+    ];
+
+    public $password;
 
     /**
      * @inheritdoc
@@ -35,13 +62,31 @@ class User extends ActiveRecord implements IdentityInterface
         return '{{%user}}';
     }
 
+    public function init()
+    {
+        parent::init();
+        $this->on(self::EVENT_CREATE, [$this, 'updateRbacAssignment']);
+        $this->on(self::EVENT_UPDATE, [$this, 'updateRbacAssignment']);
+        $this->on(self::EVENT_DELETE, [$this, 'deleteRbacAssignment']);
+    }
+
+    public static function find()
+    {
+        return new UsersQuery(get_called_class());
+    }
+
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
         return [
-            TimestampBehavior::className(),
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => false,
+                'value' => date('Y-m-d H:i:s'),
+            ],
         ];
     }
 
@@ -51,9 +96,95 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['username', 'email'], 'filter', 'filter' => 'trim'],
+            [['username'], 'filter', 'filter' => 'strip_tags'],
+            [['username', 'email'], 'required'],
+            [['password'], 'required', 'on' => self::SCENARIO_CREATE],
+
+            ['username', 'unique', 'message' => 'This username has already been taken.'],
+            ['username', 'string', 'min' => 2, 'max' => 255],
+
+            ['email', 'email'],
+            ['email', 'string', 'max' => 255],
+            ['email', 'unique', 'message' => 'This email address has already been taken.'],
+
+            ['password', 'string', 'min' => 6],
+
+            ['role', 'default', 'value' => self::ROLE_USER],
+            ['status', 'in', 'range' => [self::ROLE_ADMIN, self::ROLE_MODERATOR, self::ROLE_USER]],
+
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_BANNED]],
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->password) {
+                $this->setPassword($this->password);
+            }
+
+            if ($this->isNewRecord) {
+                $this->generateAuthKey();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns user role name
+     * 
+     * @return string
+     */
+    public function getRoleName()
+    {
+        return isset(self::$roles[$this->role]) ? self::$roles[$this->role] : '';
+    }
+
+    /**
+     * Returns user status name
+     *
+     * @return string
+     */
+    public function getStatusName()
+    {
+        return isset(self::$statuses[$this->status]) ? self::$statuses[$this->status] : '';
+    }
+
+    /**
+     * Updating RBAC assignment
+     * 
+     * @param yii\base\Event $event
+     */
+    public function updateRbacAssignment(yii\base\Event $event)
+    {
+        $auth = Yii::$app->authManager;
+        
+        /** @var User $model */
+        $model = $event->sender;
+
+        $auth->revokeAll($model->id);
+        $role = $auth->getRole($model->role);
+
+        $auth->assign($role, $model->id);
+    }
+
+    /**
+     * Deleting RBAC assignment
+     * 
+     * @param yii\base\Event $event
+     */
+    public function deleteRbacAssignment(yii\base\Event $event)
+    {
+        $auth = Yii::$app->authManager;
+
+        /** @var User $model */
+        $model = $event->sender;
+
+        $auth->revokeAll($model->id);
     }
 
     /**
@@ -81,6 +212,21 @@ class User extends ActiveRecord implements IdentityInterface
     public static function findByUsername($username)
     {
         return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Finds user by username for backend
+     * 
+     * @param string $username
+     * @return null|static
+     */
+    public static function findByUsernameBackend($username)
+    {
+        return static::findOne([
+            'username' => $username, 
+            'role' => [self::ROLE_ADMIN, self::ROLE_MODERATOR],
+            'status' => self::STATUS_ACTIVE
+        ]);
     }
 
     /**
