@@ -1,11 +1,11 @@
 <?php
 
-namespace backend\models;
+namespace frontend\models;
 
-use common\models\Post;
 use yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use common\models\Post;
 
 /**
  * PostSearch represents the model behind the search form about `common\models\Post`.
@@ -18,8 +18,7 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['id', 'ownerId', 'visible', 'status'], 'integer'],
-            [['title', 'content', 'categoriesList', 'created_at', 'updated_at'], 'safe'],
+            [['categoriesList'], 'safe'],
         ];
     }
 
@@ -36,14 +35,22 @@ class PostSearch extends Post
      * Creates data provider instance with search query applied
      *
      * @param array $params
+     * @param bool $own
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $own=false)
     {
         $query = Post::find();
 
         // add conditions that should always apply here
+        if (!$own) {
+            $query->andWhere(['{{%posts}}.status' => [Post::STATUS_ACTIVE]]);
+            $query->andWhere(['{{%posts}}.visible' => [Post::VISIBLE]]);
+        } else {
+            $query->andWhere(['{{%posts}}.ownerId' => Yii::$app->user->getId()]);
+        }
+
         $query->select('{{%posts}}.*');
         $query->with('owner');
         $query->addSelect('(SELECT GROUP_CONCAT(pc.categoryId) 
@@ -64,16 +71,6 @@ class PostSearch extends Post
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'ownerId' => $this->ownerId,
-            'visible' => $this->visible,
-            'status' => $this->status
-        ]);
-
-        $query->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'content', $this->content]);
-
         $query->andFilterWhere([
             'like',
             '(SELECT GROUP_CONCAT(pc.categoryId) 

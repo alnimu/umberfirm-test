@@ -1,22 +1,18 @@
 <?php
 
-namespace backend\controllers;
+namespace frontend\controllers;
 
-use common\models\User;
 use yii;
 use common\models\Post;
-use backend\models\PostSearch;
-use yii\filters\AccessControl;
+use frontend\models\PostSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * PostsController implements the CRUD actions for Post model.
  */
-class PostsController extends BackendController
+class PostsController extends FrontendController
 {
-    public $navbarActiveItem = 'posts';
-    
     /**
      * @inheritdoc
      */
@@ -24,12 +20,17 @@ class PostsController extends BackendController
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => yii\filters\AccessControl::className(),
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
-                        'roles' => [User::ROLE_ADMIN, User::ROLE_MODERATOR],
+                        'actions' => ['index', 'view'],
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'own', 'view', 'create', 'update'],
+                        'roles' => ['@'],
                     ]
                 ],
             ],
@@ -52,6 +53,17 @@ class PostsController extends BackendController
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+    
+    public function actionOwn()
+    {
+        $searchModel = new PostSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
+
+        return $this->render('own', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -84,7 +96,7 @@ class PostsController extends BackendController
         $model = new Post();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['own']);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -97,31 +109,22 @@ class PostsController extends BackendController
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if (!Yii::$app->user->can('updateOwnPost', ['post' => $model])) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['own']);
         } else {
             return $this->render('update', [
                 'model' => $model,
             ]);
         }
-    }
-
-    /**
-     * Deletes an existing Post model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
     }
 
     /**

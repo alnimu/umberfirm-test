@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4914f36aeb6616e21d9ce855e4b76f1d",
-    "content-hash": "cf94aeb8073fc28237bf8ce94bd5a8a0",
+    "hash": "470e7d92c830eb91f8b496a9bcc7ed8b",
+    "content-hash": "6b8bcd687239bd3064b64d31c6ad5e81",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -256,6 +256,58 @@
             "time": "2015-03-06 05:28:07"
         },
         {
+            "name": "electrolinux/php-html5lib",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/electrolinux/php-html5lib.git",
+                "reference": "9f92154993c7ecb120d9f9c0e558660d32846721"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/electrolinux/php-html5lib/zipball/9f92154993c7ecb120d9f9c0e558660d32846721",
+                "reference": "9f92154993c7ecb120d9f9c0e558660d32846721",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "HTML5Lib": "src/",
+                    "HTML5Lib\\Tests": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Multiple users",
+                    "homepage": "https://code.google.com/p/html5lib/",
+                    "role": "Original developers"
+                },
+                {
+                    "name": "Sébastien Lavoie",
+                    "homepage": "http://blog.lavoie.sl",
+                    "role": "Packager"
+                },
+                {
+                    "name": "didier Belot",
+                    "role": "Packager"
+                }
+            ],
+            "description": "A PHP implementations of a HTML parser based on the WHATWG HTML5 specification.",
+            "homepage": "https://github.com/electrolinux/php-html5lib",
+            "keywords": [
+                "HTML5",
+                "php"
+            ],
+            "time": "2013-03-18 18:32:30"
+        },
+        {
             "name": "ezyang/htmlpurifier",
             "version": "v4.7.0",
             "source": {
@@ -298,6 +350,56 @@
                 "html"
             ],
             "time": "2015-08-05 01:03:42"
+        },
+        {
+            "name": "judev/php-htmltruncator",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/judev/php-htmltruncator.git",
+                "reference": "c1c44513f686e742f6b6f55e8fd86d3465e3a013"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/judev/php-htmltruncator/zipball/c1c44513f686e742f6b6f55e8fd86d3465e3a013",
+                "reference": "c1c44513f686e742f6b6f55e8fd86d3465e3a013",
+                "shasum": ""
+            },
+            "require": {
+                "electrolinux/php-html5lib": "0.1.0",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.4.*"
+            },
+            "suggest": {
+                "ext-intl": "*",
+                "ext-mbstring": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "HtmlTruncator": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jude Venn",
+                    "homepage": "https://github.com/judev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "HTML Truncation library, ported from the html_truncator rubygem",
+            "homepage": "https://github.com/judev/php-htmltruncator",
+            "keywords": [
+                "html",
+                "php"
+            ],
+            "time": "2016-04-06 13:52:41"
         },
         {
             "name": "kartik-v/yii2-krajee-base",

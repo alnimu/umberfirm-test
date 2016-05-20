@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\scopes\PostsQuery;
+use HtmlTruncator\Truncator;
 use voskobovich\behaviors\ManyToManyBehavior;
 use yii;
 
@@ -24,6 +25,7 @@ use yii;
  * @property string $statusName read-only statusName
  * @property string $visibilityName read-only statusName
  * @property string $categoriesString
+ * @property string $shortContent
  */
 class Post extends yii\db\ActiveRecord
 {
@@ -164,6 +166,15 @@ class Post extends yii\db\ActiveRecord
         ];
     }
 
+    public function beforeSave($insert)
+    {
+        if (Yii::$app->user->identity->role == User::ROLE_USER and $this->visible == self::VISIBLE) {
+            $this->status = self::STATUS_MODERATE;
+        }
+
+        return parent::beforeSave($insert);
+    }
+
     public function afterDelete()
     {
         parent::afterDelete();
@@ -175,6 +186,11 @@ class Post extends yii\db\ActiveRecord
     public function getOwner()
     {
         return $this->hasOne(User::className(), ['id' => 'ownerId']);
+    }
+
+    public function getShortContent()
+    {
+        return Truncator::truncate($this->content, 20);
     }
 
     /**

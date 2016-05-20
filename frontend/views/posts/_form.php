@@ -2,7 +2,6 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Post */
@@ -19,9 +18,7 @@ use kartik\select2\Select2;
 
     <?= $form->field($model, 'visible')->dropDownList(\common\models\Post::$visibility) ?>
 
-    <?= $form->field($model, 'status')->dropDownList(\common\models\Post::$statuses) ?>
-
-    <?= $form->field($model, 'selectedCategories')->widget(Select2::className(), [
+    <?= $form->field($model, 'selectedCategories')->widget(\kartik\select2\Select2::className(), [
         'data' => \yii\helpers\ArrayHelper::map(\common\models\PostCategory::find()->asArray()->all(), 'id', 'name'),
         'language' => 'en',
         'options' => ['placeholder' => 'Select categories ...', 'multiple' => true],
