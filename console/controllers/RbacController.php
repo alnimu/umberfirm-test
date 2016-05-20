@@ -27,6 +27,10 @@ class RbacController extends Controller
         $user->description = 'User';
         $auth->add($user);
 
+        $guest = $auth->createRole('guest');
+        $guest->description = 'Guest';
+        $auth->add($guest);
+
         // add the rules
         $authorRule = new AuthorRule();
         $auth->add($authorRule);
@@ -48,5 +52,6 @@ class RbacController extends Controller
         $auth->add($viewPost);
 
         $auth->addChild($user, $viewPost);
+        $auth->addChild($guest, $viewPost);
     }
 }
