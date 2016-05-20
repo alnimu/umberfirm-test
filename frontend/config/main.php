@@ -10,6 +10,8 @@ return [
     'id' => 'Umber firm Frontend',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'defaultRoute' => '/posts/index',
+    'homeUrl' => ['/posts/index'],
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'user' => [

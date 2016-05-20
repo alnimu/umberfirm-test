@@ -62,16 +62,6 @@ class SiteController extends FrontendController
     }
 
     /**
-     * Displays homepage.
-     *
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        return $this->render('index');
-    }
-
-    /**
      * Logs in a user.
      *
      * @return mixed

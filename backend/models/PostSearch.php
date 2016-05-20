@@ -18,8 +18,8 @@ class PostSearch extends Post
     public function rules()
     {
         return [
-            [['id', 'ownerId', 'visible', 'status'], 'integer'],
-            [['title', 'content', 'categoriesList', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'visible', 'status'], 'integer'],
+            [['title', 'categoriesList', 'ownerId'], 'safe'],
         ];
     }
 
@@ -45,7 +45,7 @@ class PostSearch extends Post
 
         // add conditions that should always apply here
         $query->select('{{%posts}}.*');
-        $query->with('owner');
+        $query->joinWith(['owner']);
         $query->addSelect('(SELECT GROUP_CONCAT(pc.categoryId) 
                             FROM {{%post_has_category}} pc
                             WHERE {{%posts}}.id = pc.postId
@@ -54,6 +54,11 @@ class PostSearch extends Post
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
+
+        $dataProvider->sort->attributes['ownerId'] = [
+            'asc' => ['{{%user}}.username' => SORT_ASC],
+            'desc' => ['{{%user}}.username' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -66,13 +71,12 @@ class PostSearch extends Post
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'ownerId' => $this->ownerId,
             'visible' => $this->visible,
             'status' => $this->status
         ]);
 
         $query->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'content', $this->content]);
+            ->andFilterWhere(['like', '{{%user}}.username', $this->ownerId]);
 
         $query->andFilterWhere([
             'like',
