@@ -81,6 +81,10 @@ class PostsController extends FrontendController
             throw new NotFoundHttpException('The requested page does not exist.');
         }
 
+        if (!Yii::$app->user->can('postView', ['post' => $model])) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
         return $this->render('view', [
             'model' => $model,
         ]);

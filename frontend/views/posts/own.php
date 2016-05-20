@@ -59,8 +59,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{update}',
+                'template' => '{view} {update}',
                 'buttons'=> [
+                    'view' => function ($url, $model, $key) {
+                        return Html::a('View', $url);
+                    },
                     'update' => function ($url, $model, $key) {
                         return $model->status != \common\models\Post::STATUS_DELETED ? Html::a('Update', $url) : '';
                     },
